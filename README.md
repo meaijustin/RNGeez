@@ -1,16 +1,9 @@
-# randomiser
+# RNGeez
 
-Randomiser Application
+A Randomiser Application
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Current Features
+- A Shuffler that assigns user inputted people to numbers (function unimplemented)
+- A Random Number Generator with customisable range and amount.
+- A Decision maker that pics a random decision to make for you.
+- And finally, if you dont know which randomiser to use, a feature to randomly select a random randomiser! (function unimplemented)
