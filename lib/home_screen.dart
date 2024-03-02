@@ -1,7 +1,8 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:randomiser/RNGeezer.dart';
-import 'package:randomiser/decisionMaker.dart';
+import 'package:randomiser/rngeezer.dart';
+import 'package:randomiser/decision_maker.dart';
 import 'package:randomiser/main.dart';
 import 'package:randomiser/shuffler.dart';
 
@@ -118,11 +119,30 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  //TODO: push to a random randomiser
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Generate a random index between 0 and 2
+                    final randomIndex = Random().nextInt(3);
 
-                },
+                    // Decide which screen to navigate to based on the random index
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          switch (randomIndex) {
+                            case 0:
+                              return const DecisionMakerScreen();
+                            case 1:
+                              return const ShufflerScreen();
+                            case 2:
+                              return const RNGeezScreen();
+                            default:
+                              return const DecisionMakerScreen();
+                          }
+                        },
+                      ),
+                    );
+                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.black,

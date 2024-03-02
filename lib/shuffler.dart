@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:randomiser/shufflerOutput.dart';
+import 'package:randomiser/shuffler_output.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShufflerScreen extends StatefulWidget {
   const ShufflerScreen({Key? key}) : super(key: key);
@@ -9,6 +10,33 @@ class ShufflerScreen extends StatefulWidget {
 }
 
 class _ShufflerScreenState extends State<ShufflerScreen> {
+  final List<String> _leftElements = [];
+  final List<String> _rightElements = [];
+  String _leftTitle="People";
+  String _rightTitle="Numbers";
+  final TextEditingController  _leftInputController= TextEditingController();
+  final TextEditingController  _rightInputController= TextEditingController();
+
+  Future<void> _saveParams() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('leftTitle', _leftTitle);
+    await prefs.setString('rightTitle', _rightTitle);
+    await prefs.setStringList('leftElements', _leftElements);
+    await prefs.setStringList('rightElements', _rightElements);
+  }
+
+  Future<void> _loadParams() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _leftTitle = prefs.getString('leftTitle') ?? "People";
+      _rightTitle = prefs.getString('rightTitle') ?? "Numbers";
+      _leftElements.clear();
+      _leftElements.addAll(prefs.getStringList('leftElements') ?? []);
+      _rightElements.clear();
+      _rightElements.addAll(prefs.getStringList('rightElements') ?? []);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +47,7 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-          backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(3),
@@ -33,28 +61,95 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                     child: Card(
                       color: Theme.of(context).colorScheme.surface,
                       child: Padding(
-                        padding: const EdgeInsets.all(3),
+                        padding: const EdgeInsets.all(1),
                         child: Column(
                           children: [
                             ListTile(
-                              title: Text(
-                                'People',
-                                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
+                              title: GestureDetector(
+                                child: Text(
+                                  _leftTitle,
+                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Edit Title'),
+                                      content: TextFormField(
+                                        initialValue: _leftTitle,
+                                        decoration: const InputDecoration(
+                                          hintText: 'New Title',
+                                        ),
+                                        onFieldSubmitted: (value) {
+                                          Navigator.of(context).pop();
+                                          setState(() {
+                                            _leftTitle = value;
+                                          });
+                                        },
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Add $_leftTitle'),
+                                      content: TextFormField(
+                                        controller: _leftInputController,
+                                        decoration: InputDecoration(
+                                          hintText: 'New $_leftTitle',
+                                        ),
+                                        onFieldSubmitted: (value) {
+                                          setState(() {
+                                            _leftElements.add(value);
+                                          });
+                                          _leftInputController.clear();
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             Expanded(
                               child: ListView.builder(
-                                itemCount: 0, // Placeholder for list entries
+                                itemCount: _leftElements.length,
                                 itemBuilder: (context, index) => ListTile(
-                                  title: Text('Person $index'),
+                                  title: Text(_leftElements[index]),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () {
+                                      setState(() {
+                                        _leftElements.removeAt(index);
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () => {}, //TODO: implement adding
                             ),
                           ],
                         ),
@@ -65,28 +160,95 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                     child: Card(
                       color: Theme.of(context).colorScheme.surface,
                       child: Padding(
-                        padding: const EdgeInsets.all(3),
+                        padding: const EdgeInsets.all(1),
                         child: Column(
                           children: [
                             ListTile(
-                              title: Text(
-                                'Numbers',
-                                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
+                              title: GestureDetector(
+                                child: Text(
+                                  _rightTitle,
+                                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Edit Title'),
+                                      content: TextFormField(
+                                        initialValue: _rightTitle,
+                                        decoration: const InputDecoration(
+                                          hintText: 'New Title',
+                                        ),
+                                        onFieldSubmitted: (value) {
+                                          Navigator.of(context).pop();
+                                          setState(() {
+                                            _rightTitle = value;
+                                          });
+                                        },
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Add $_rightTitle'),
+                                      content: TextFormField(
+                                        controller: _rightInputController,
+                                        decoration: InputDecoration(
+                                          hintText: 'New $_rightTitle',
+                                        ),
+                                        onFieldSubmitted: (value) {
+                                          setState(() {
+                                            _rightElements.add(value);
+                                          });
+                                          _rightInputController.clear();
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text('Cancel'),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             Expanded(
                               child: ListView.builder(
-                                itemCount: 0, // Placeholder for list entries
+                                itemCount: _rightElements.length,
                                 itemBuilder: (context, index) => ListTile(
-                                  title: Text('Number $index'),
+                                  title: Text(_rightElements[index]),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () {
+                                      setState(() {
+                                        _rightElements.removeAt(index);
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () => {}, //TODO: implement adding
                             ),
                           ],
                         ),
@@ -97,21 +259,65 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const OutputScreen()),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    if (_leftElements.isEmpty || _rightElements.isEmpty){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            showCloseIcon: true,
+                            content: Text('Input at least one element in each list!'),
+                        )
+                      );
+                    }
+                    else{
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OutputScreen(
+                            leftShuffler: _leftElements,
+                            rightShuffler: _rightElements,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Shuffle'),
                 ),
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                const SizedBox(width: 5),
+                ElevatedButton(
+                  onPressed: _saveParams,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Save'),
                 ),
-              ),
-              child: const Text('Shuffle'),
+                const SizedBox(width: 5),
+                ElevatedButton(
+                  onPressed: _loadParams,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Load'),
+                ),
+              ],
             ),
           ],
         ),
