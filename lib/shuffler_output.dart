@@ -6,12 +6,12 @@ import 'dart:math';
 import 'main.dart';
 
 class OutputScreen extends StatefulWidget {
-  List<dynamic> leftShuffler;
-  List<dynamic> rightShuffler;
-  String leftTitle;
-  String rightTitle;
+  final List<dynamic> leftShuffler;
+  final List<dynamic> rightShuffler;
+  final String leftTitle;
+  final String rightTitle;
 
-  OutputScreen({
+  const OutputScreen({
     Key? key,
     required this.leftTitle,
     required this.rightTitle,
