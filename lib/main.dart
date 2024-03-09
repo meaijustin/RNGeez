@@ -4,7 +4,39 @@ import 'package:randomiser/firebase_options.dart';
 import 'package:randomiser/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firebase_options.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:uuid/uuid.dart';
+
+final storage = FlutterSecureStorage();
+
+void saveDeviceId() async {
+  String? deviceId = await storage.read(key: 'device_id');
+  if (deviceId == null) {
+    deviceId = Uuid().v4();
+    await storage.write(key: 'device_id', value: deviceId);
+  }
+}
+
+
+
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  saveDeviceId();
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );});
+}
 
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
@@ -15,19 +47,6 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-
-Future main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final FirebaseFirestore db = FirebaseFirestore.instance;
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: const MyApp(),
-    ),
-  );
-}
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);

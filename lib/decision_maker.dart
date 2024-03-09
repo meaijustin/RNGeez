@@ -1,6 +1,9 @@
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'main.dart';
 
 class DecisionMakerScreen extends StatefulWidget {
   const DecisionMakerScreen({Key? key}) : super(key: key);
@@ -41,6 +44,16 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
             content: Text(randomItem),
             actions: [
               TextButton(
+              onPressed: () async {
+                String? deviceId = await storage.read(key: 'device_id');
+                CollectionReference decisions = FirebaseFirestore.instance.collection('decisions');
+                await decisions.add({
+                  'deviceId':deviceId,
+                  'options': _DecisionItems,
+                  'pickedItem': randomItem,
+                });
+                }, child: Text("Save Output")),
+              TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -52,6 +65,7 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
       );
     }
   }
+
   Future<void> _saveItems() async {
     final prefs = await SharedPreferences.getInstance();
     final setName = await showDialog<String>(
@@ -82,12 +96,15 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
       },
     );
     if (setName != null && setName.isNotEmpty) {
-      await prefs.setStringList(setName, _DecisionItems);
+      await prefs.setStringList("_DecisionSet $setName", _DecisionItems);
     }
   }
+
   Future<void> _loadItems() async {
     final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys().where((key) => key.startsWith('_Decision')).toList();
+    final keys = prefs.getKeys()
+        .where((key) => key.startsWith('_DecisionSet '))
+        .toList();
     final setName = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -98,12 +115,13 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
             height: 200, // Adjust this value as needed
             child: ListView.builder(
               itemCount: keys.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(keys.elementAt(index)),
-                onTap: () {
-                  Navigator.of(context).pop(keys.elementAt(index));
-                },
-              ),
+              itemBuilder: (context, index) =>
+                  ListTile(
+                    title: Text((keys.elementAt(index)).substring(13)),
+                    onTap: () {
+                      Navigator.of(context).pop(keys.elementAt(index));
+                    },
+                  ),
             ),
           ),
         );
@@ -119,7 +137,9 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
 
   Future<void> _deleteItems() async {
     final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys().where((key) => key.startsWith('_Decision')).toList();
+    final keys = prefs.getKeys()
+        .where((key) => key.startsWith('_Decision'))
+        .toList();
     final setName = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -130,12 +150,13 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
             height: 200, // Adjust this value as needed
             child: ListView.builder(
               itemCount: keys.length,
-              itemBuilder: (context, index) => ListTile(
-                title: Text(keys.elementAt(index)),
-                onTap: () {
-                  Navigator.of(context).pop(keys.elementAt(index));
-                },
-              ),
+              itemBuilder: (context, index) =>
+                  ListTile(
+                    title: Text(keys.elementAt(index)),
+                    onTap: () {
+                      Navigator.of(context).pop(keys.elementAt(index));
+                    },
+                  ),
             ),
           ),
         );
@@ -149,8 +170,6 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
     }
   }
 
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -163,111 +182,122 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _itemController,
-              decoration: InputDecoration(
-                labelText: 'Add Item',
-                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                border: const OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _addItem,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text('Add'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _pickRandomItem,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text('Pick Random Item'),
-            ),
-            const SizedBox(height: 20),
-            Row(
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: _saveItems,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                TextField(
+                  controller: _itemController,
+                  decoration: InputDecoration(
+                    labelText: 'Add Item',
+                    labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    border: const OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
-                  child: const Text('Save Set'),
                 ),
-                const SizedBox(width: 5,),
-                ElevatedButton(
-                  onPressed: _loadItems,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _addItem,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Add'),
                     ),
-                  ),
-                  child: const Text('Load Set'),
+                    const SizedBox(width: 5),
+                    ElevatedButton(
+                      onPressed: _pickRandomItem,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Pick Random Item'),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 5),
-                ElevatedButton(
-                  onPressed: _deleteItems,
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _saveItems,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Save Set'),
                     ),
-                  ),
-                  child: const Text('Delete Set'),
+                    const SizedBox(width: 5,),
+                    ElevatedButton(
+                      onPressed: _loadItems,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Load Set'),
+                    ),
+                    const SizedBox(width: 5),
+                    ElevatedButton(
+                      onPressed: _deleteItems,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Delete Set'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: _DecisionItems.length,
+                  itemBuilder: (context, index) =>
+                      ListTile(
+                        title: Text(
+                          _DecisionItems[index],
+                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close),
+                          color: Theme.of(context).colorScheme.onSurface,
+                          onPressed: () => _removeItem(index),
+                        ),
+                      ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _DecisionItems.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(
-                    _DecisionItems[index],
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.close),
-                    color: Theme.of(context).colorScheme.onSurface,
-                    onPressed: () => _removeItem(index),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

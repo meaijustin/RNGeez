@@ -1,12 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+
+
+import 'main.dart';
 
 class OutputScreen extends StatefulWidget {
   List<dynamic> leftShuffler;
   List<dynamic> rightShuffler;
+  String leftTitle;
+  String rightTitle;
 
   OutputScreen({
     Key? key,
+    required this.leftTitle,
+    required this.rightTitle,
     required this.leftShuffler,
     required this.rightShuffler,
   }) : super(key: key);
@@ -18,10 +26,14 @@ class OutputScreen extends StatefulWidget {
 class _OutputScreenState extends State<OutputScreen> {
   late List<dynamic> leftItems;
   late List<dynamic> rightItems;
+  late String leftTitle;
+  late String rightTitle;
 
   @override
   void initState() {
     super.initState();
+    leftTitle=widget.leftTitle;
+    rightTitle=widget.rightTitle;
     leftItems = widget.leftShuffler;
     rightItems = _shuffle(widget.rightShuffler);
   }
@@ -52,12 +64,25 @@ class _OutputScreenState extends State<OutputScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            onPressed: () async {
+              CollectionReference shuffledItems = FirebaseFirestore.instance.collection('shuffledItems');
+              String? deviceId = await storage.read(key: 'device_id');
+              await shuffledItems.add({
+                'deviceId': deviceId,
+                'leftTitle':leftTitle,
+                'leftItems': leftItems,
+                'rightTitle': rightTitle,
+                'rightItems': rightItems,
+              });
+            },
+            icon: Icon(Icons.save, color: Theme.of(context).colorScheme.primary),),
+          IconButton(
             onPressed: () {
               setState(() {
                 rightItems = _shuffle(widget.rightShuffler);
               });
             },
-            icon: Icon(Icons.shuffle, color: Theme.of(context).colorScheme.onPrimary),
+            icon: Icon(Icons.shuffle, color: Theme.of(context).colorScheme.primary),
           ),
         ],
       ),
@@ -73,7 +98,7 @@ class _OutputScreenState extends State<OutputScreen> {
               leading: CircleAvatar(
                 radius: 30,
                 backgroundColor: Colors.grey[300],
-                child: Text('Pair ${leftItems[index]}',
+                child: Text('${index+1}',
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       color: Theme.of(context).colorScheme.onBackground,
                       fontWeight: FontWeight.bold,

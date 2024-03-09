@@ -6,6 +6,8 @@ import 'package:randomiser/decision_maker.dart';
 import 'package:randomiser/main.dart';
 import 'package:randomiser/shuffler.dart';
 
+import 'outputs.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -156,6 +158,34 @@ class HomeScreen extends StatelessWidget {
                   child: Text('Random Randomizer',
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: Colors.black,
+                      )
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OutputsScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.all(16.0),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Saved Outputs',
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Colors.black
                       )
                   ),
                 ),

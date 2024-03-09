@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'main.dart';
+
 class RNGeezScreen extends StatefulWidget {
   const RNGeezScreen({Key? key}) : super(key: key);
 
@@ -34,8 +36,10 @@ class _RNGeezScreenState extends State<RNGeezScreen> {
         action: SnackBarAction(
           label: 'Yes',
           onPressed: () async {
+            String? deviceId = await storage.read(key: 'device_id');
             CollectionReference rngValues = FirebaseFirestore.instance.collection('rngValues');
             await rngValues.add({
+              'deviceId': deviceId,
               'minValue': _minValue,
               'maxValue': _maxValue,
               'numValues': _numValues,

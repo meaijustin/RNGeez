@@ -10,36 +10,137 @@ class ShufflerScreen extends StatefulWidget {
 }
 
 class _ShufflerScreenState extends State<ShufflerScreen> {
-  final List<String> _leftElements = [];
-  final List<String> _rightElements = [];
+
+  List<String> _leftElements = [];
+  List<String> _rightElements = [];
   String _leftTitle="People";
   String _rightTitle="Numbers";
   final TextEditingController  _leftInputController= TextEditingController();
   final TextEditingController  _rightInputController= TextEditingController();
-
   Future<void> _saveParams() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('leftTitle', _leftTitle);
-    await prefs.setString('rightTitle', _rightTitle);
-    await prefs.setStringList('leftElements', _leftElements);
-    await prefs.setStringList('rightElements', _rightElements);
+    final setName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: const Text('Save As'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: 'Enter a name for this set'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+    if (setName != null && setName.isNotEmpty) {
+      await prefs.setString('leftTitle $setName', _leftTitle);
+      await prefs.setString('rightTitle $setName', _rightTitle);
+      await prefs.setStringList('leftElements $setName', _leftElements);
+      await prefs.setStringList('rightElements $setName', _rightElements);
+    }
   }
 
   Future<void> _loadParams() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _leftTitle = prefs.getString('leftTitle') ?? "People";
-      _rightTitle = prefs.getString('rightTitle') ?? "Numbers";
-      _leftElements.clear();
-      _leftElements.addAll(prefs.getStringList('leftElements') ?? []);
-      _rightElements.clear();
-      _rightElements.addAll(prefs.getStringList('rightElements') ?? []);
-    });
+    final keys = prefs.getKeys()
+        .where((key) => key.startsWith('leftTitle '))
+        .toList();
+    final setName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Load Set'),
+          content: Container(
+            width: double.maxFinite,
+            height: 200, // Adjust this value as needed
+            child: ListView.builder(
+              itemCount: keys.length,
+              itemBuilder: (context, index) =>
+                  ListTile(
+                    title: Text(keys.elementAt(index).substring(10)),
+                    onTap: () {
+                      Navigator.of(context).pop(keys.elementAt(index).substring(10));
+                    },
+                  ),
+            ),
+          ),
+        );
+      },
+    );
+    if (setName != null && setName.isNotEmpty) {
+      setState(() {
+        _leftTitle = prefs.getString('leftTitle $setName') ?? "People";
+        _rightTitle = prefs.getString('rightTitle $setName') ?? "Numbers";
+        _leftElements.clear();
+        _leftElements.addAll(prefs.getStringList('leftElements $setName') ?? []);
+        _rightElements.clear();
+        _rightElements.addAll(prefs.getStringList('rightElements $setName') ?? []);
+      });
+    }
   }
+
+  Future<void> _deleteParams() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys()
+        .where((key) => key.startsWith('leftTitle '))
+        .toList();
+    final setName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Set'),
+          content: Container(
+            width: double.maxFinite,
+            height: 200, // Adjust this value as needed
+            child: ListView.builder(
+              itemCount: keys.length,
+              itemBuilder: (context, index) =>
+                  ListTile(
+                    title: Text(keys.elementAt(index).substring(10)),
+                    onTap: () {
+                      Navigator.of(context).pop(keys.elementAt(index).substring(10));
+                    },
+                  ),
+            ),
+          ),
+        );
+      },
+    );
+    if (setName != null && setName.isNotEmpty) {
+      prefs.remove('leftTitle $setName');
+      prefs.remove('rightTitle $setName');
+      prefs.remove('leftElements $setName');
+      prefs.remove('rightElements $setName');
+      setState(() {
+        _leftTitle = "People";
+        _rightTitle = "Numbers";
+        _leftElements.clear();
+        _rightElements.clear();
+      });
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           'Shuffler',
@@ -137,9 +238,17 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                             ),
                             Expanded(
                               child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
                                 itemCount: _leftElements.length,
                                 itemBuilder: (context, index) => ListTile(
-                                  title: Text(_leftElements[index]),
+                                  title: Text(
+                                      _leftElements[index],
+                                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  ),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.remove),
                                     onPressed: () {
@@ -158,6 +267,7 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                   ),
                   Expanded(
                     child: Card(
+
                       color: Theme.of(context).colorScheme.surface,
                       child: Padding(
                         padding: const EdgeInsets.all(1),
@@ -174,8 +284,10 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                                 ),
                                 onTap: () {
                                   showDialog(
+
                                     context: context,
                                     builder: (context) => AlertDialog(
+
                                       title: const Text('Edit Title'),
                                       content: TextFormField(
                                         initialValue: _rightTitle,
@@ -236,9 +348,17 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                             ),
                             Expanded(
                               child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
                                 itemCount: _rightElements.length,
                                 itemBuilder: (context, index) => ListTile(
-                                  title: Text(_rightElements[index]),
+                                  title: Text(
+                                    _rightElements[index],
+                                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   trailing: IconButton(
                                     icon: const Icon(Icons.remove),
                                     onPressed: () {
@@ -277,6 +397,8 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => OutputScreen(
+                            leftTitle:_leftTitle,
+                            rightTitle:_rightTitle,
                             leftShuffler: _leftElements,
                             rightShuffler: _rightElements,
                           ),
@@ -316,6 +438,18 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
                     ),
                   ),
                   child: const Text('Load'),
+                ),
+                const SizedBox(width: 5),
+                ElevatedButton(
+                  onPressed: _deleteParams,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Delete'),
                 ),
               ],
             ),
