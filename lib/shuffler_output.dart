@@ -97,7 +97,7 @@ class _OutputScreenState extends State<OutputScreen> {
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
                 radius: 30,
-                backgroundColor: Colors.grey[300],
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
                 child: Text('${index+1}',
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
                       color: Theme.of(context).colorScheme.onBackground,
