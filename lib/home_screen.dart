@@ -123,10 +123,7 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Generate a random index between 0 and 2
                     final randomIndex = Random().nextInt(3);
-
-                    // Decide which screen to navigate to based on the random index
                     Navigator.push(
                       context,
                       MaterialPageRoute(

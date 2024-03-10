@@ -109,9 +109,9 @@ class _RNGeezScreenState extends State<RNGeezScreen> {
       },
     );
     if (setName != null && setName.isNotEmpty) {
-      final values = prefs.getString(setName)?.split(',') ?? ['0', '100', '1'];
+      final values = prefs.getString(setName)?.split(',');
       setState(() {
-        _minValue = int.parse(values[0]);
+        _minValue = int.parse(values![0]);
         _maxValue = int.parse(values[1]);
         _numValues = int.parse(values[2]);
         _minValueController.text = "$_minValue";
@@ -131,11 +131,11 @@ class _RNGeezScreenState extends State<RNGeezScreen> {
           title: const Text('Delete Set'),
           content: Container(
             width: double.maxFinite,
-            height: 200, // Adjust this value as needed
+            height: 200,
             child: ListView.builder(
               itemCount: keys.length,
               itemBuilder: (context, index) => ListTile(
-                title: Text(keys.elementAt(index).substring(4)), // Remove the 'RNG_' prefix
+                title: Text(keys.elementAt(index).substring(4)),
                 onTap: () {
                   Navigator.of(context).pop(keys.elementAt(index));
                 },

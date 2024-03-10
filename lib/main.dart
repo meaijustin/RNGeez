@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
           bodyLarge: TextStyle(fontSize:  21.0, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
         ),
       ),
-      themeMode: context.watch<ThemeProvider>().themeMode, // Use system theme (light/dark)
+      themeMode: context.watch<ThemeProvider>().themeMode,
       home: const SplashScreen(),
     );
   }

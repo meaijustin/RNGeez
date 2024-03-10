@@ -134,9 +134,6 @@ class _ShufflerScreenState extends State<ShufflerScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

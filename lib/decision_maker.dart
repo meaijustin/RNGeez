@@ -152,7 +152,7 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
               itemCount: keys.length,
               itemBuilder: (context, index) =>
                   ListTile(
-                    title: Text(keys.elementAt(index)),
+                    title: Text((keys.elementAt(index)).substring(13)),
                     onTap: () {
                       Navigator.of(context).pop(keys.elementAt(index));
                     },
@@ -182,122 +182,118 @@ class _DecisionMakerScreenState extends State<DecisionMakerScreen> {
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: _itemController,
-                  decoration: InputDecoration(
-                    labelText: 'Add Item',
-                    labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    border: const OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+      body: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _itemController,
+              decoration: InputDecoration(
+                labelText: 'Add Item',
+                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                border: const OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 5),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _addItem,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Add'),
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _addItem,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(width: 5),
-                    ElevatedButton(
-                      onPressed: _pickRandomItem,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Pick Random Item'),
-                    ),
-                  ],
+                  ),
+                  child: const Text('Add'),
                 ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _saveItems,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Save Set'),
+                const SizedBox(width: 5),
+                ElevatedButton(
+                  onPressed: _pickRandomItem,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(width: 5,),
-                    ElevatedButton(
-                      onPressed: _loadItems,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Load Set'),
-                    ),
-                    const SizedBox(width: 5),
-                    ElevatedButton(
-                      onPressed: _deleteItems,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Delete Set'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _DecisionItems.length,
-                  itemBuilder: (context, index) =>
-                      ListTile(
-                        title: Text(
-                          _DecisionItems[index],
-                          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close),
-                          color: Theme.of(context).colorScheme.onSurface,
-                          onPressed: () => _removeItem(index),
-                        ),
-                      ),
+                  ),
+                  child: const Text('Pick Random Item'),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _saveItems,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Save Set'),
+                ),
+                const SizedBox(width: 5,),
+                ElevatedButton(
+                  onPressed: _loadItems,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Load Set'),
+                ),
+                const SizedBox(width: 5),
+                ElevatedButton(
+                  onPressed: _deleteItems,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Delete Set'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _DecisionItems.length,
+                itemBuilder: (context, index) =>
+                    ListTile(
+                      title: Text(
+                        _DecisionItems[index],
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close),
+                        color: Theme.of(context).colorScheme.onSurface,
+                        onPressed: () => _removeItem(index),
+                      ),
+                    ),
+              ),
+            ),
+          ],
         ),
       ),
     );
